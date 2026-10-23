@@ -160,9 +160,11 @@ streamlit run app/app.py
 
 | Name | Role |
 |------|------|
-| Divi Teja Dimmiti | Team Lead · RAG pipeline and Test data |
+| Divi Teja Dimmiti | Team Lead · RAG pipeline and LLM integration |
 | Shilpa Golla | PDF extraction and LLM integration |
 | Vijay Boyapati | Evaluation and Streamlit demo |
+
+The test set (60 questions) is written and checked by all three members.
 
 ## Safety notice
 
