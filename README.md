@@ -1,6 +1,6 @@
 # FactoryDocs Assistant
 
-**A Retrieval-Augmented Chatbot for Production and Logistics Manuals**
+**A Retrieval-Augmented Chatbot for Robot Error Diagnosis in Production**
 
 > Case Study: Intelligent Systems in Production (MDM-2) · Deggendorf Institute of Technology (THD)
 > Track: Software & Simulation · Lecturer: Hamidreza Heidari, PhD
@@ -12,15 +12,30 @@
 
 ## About the project
 
-Factory and warehouse workers often need quick answers, such as *"What is the robot's maximum payload?"* or *"How often must forklift brakes be checked?"* These answers are buried in manuals with hundreds of pages. Searching by hand is slow, and general AI chatbots can give confident but wrong answers, which can damage machines or hurt people.
+Collaborative robots like the Universal Robots UR5e are widely used in production, for example to load CNC machines or pick and place parts. In real operation, the robot often stops itself for safety (a protective stop) and shows an error code, such as C153 (position deviates from path) or C157 (collision detected by joint). When the robot stops, the connected machine and material flow stop too.
 
-**FactoryDocs Assistant** is a chatbot that answers questions **only** from verified manuals, using Retrieval-Augmented Generation (RAG):
+The cause and the fix are spread across several long manuals: the error code directory, the robot user manual, the gripper manual and the service handbook. Workers often describe the problem in their own words, which simple keyword search (Ctrl+F) cannot handle. General AI chatbots can give confident but wrong answers, which can damage machines or hurt people.
+
+
+**FactoryDocs Assistant** lets the worker type the error code or the problem and answers **only** from these manuals, using Retrieval-Augmented Generation (RAG):
 
 - Finds the relevant part of the manual
 - A local language model writes a short answer
 - **Every answer shows the source page**
 - If the answer is not in the manuals, it says **"I don't know"** instead of guessing
 - Runs **locally** with Ollama, so documents never leave the computer
+
+## Input and output
+
+**Input:** an error code (e.g., "C157A2") or a problem in the worker's own words (e.g., "The robot keeps dropping parts")
+
+**Output:** meaning of the error, likely cause, fix steps, and source pages from the manuals, or "I don't know" if the answer is not in the manuals
+
+## Real-world problem
+
+- Protective stops are commonly caused by a wrong payload setting, collisions, dragging cables or high acceleration [8].
+- Universal Robots requires that every protective stop is investigated before restarting: "Protective Stop warning message SHALL NOT be reset without a review to determine the fault's root cause" [8].
+- Unplanned downtime costs the world's 500 largest companies about $1.4 trillion per year [7].
 
 ## How it works
 
@@ -46,13 +61,13 @@ All four approaches are tested on the same question set:
 | 1 | Plain LLM | No retrieval, answers from the model's memory (shows hallucination risk) |
 | 2 | BM25 RAG | Keyword search baseline |
 | 3 | Dense RAG | Meaning-based search with sentence embeddings |
-| 4 | Hybrid RAG | BM25 + dense search combined (handles error codes and part numbers) |
+| 4 | Hybrid RAG | BM25 + dense search combined (handles exact error codes like C157A2 and problem descriptions) |
 
 We also test different chunk sizes and top-k values.
 
 ## Evaluation
 
-**Test set:** 60 team-written questions in 5 types: fact, table value, procedure, safety rule, and unanswerable.
+**Test set:** 60 team-written questions in 5 types: error code, problem description, multi-document, procedure, and unanswerable.
 
 | KPI | What it measures | Target |
 |-----|------------------|--------|
@@ -65,13 +80,14 @@ Targets are goals; final results will be added here after the experiments.
 
 ## Data
 
-We use public manuals from production and logistics. **The PDFs are not stored in this repository** (copyright); download them from the original sources and place them in `data/raw/`.
+We use four public manuals for the UR5e robot and its gripper. **The PDFs are not stored in this repository** (copyright); download them from the original sources and place them in `data/raw/`.
 
-| Domain | Document | Source |
-|--------|----------|--------|
-| Production | Universal Robots UR5e User Manual | Universal Robots website *(link to be added)* |
-| Logistics | OSHA Powered Industrial Trucks (29 CFR 1910.178) | [osha.gov](https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.178) |
-| Production | Conveyor or CNC manual | *(to be selected)* |
+| Document | What it gives | Source |
+|---|---|---|
+| UR Error Codes Directory | Meaning and suggested fix for robot error codes | [Universal Robots](https://www.universal-robots.com/manuals/EN/PDF/Shared/ErrorCodes/ErrorCodes.pdf) |
+| UR5e User Manual | Robot settings, e.g., payload and safety | [Universal Robots](https://s3-eu-west-1.amazonaws.com/ur-support-site/262292/710-965-00_UR5e_User_Manual_en_Global.pdf) |
+| Robotiq 2F-85 / 2F-140 Manual (for UR) | Gripper problems, e.g., dropped parts | [Robotiq](https://assets.robotiq.com/website-assets/support_documents/document/2F-85_2F-140_UR_PDF_20200211.pdf) |
+| UR e-Series Service Handbook | Repair and troubleshooting steps | [Universal Robots](https://www.universal-robots.com/download/manuals-e-seriesur-series/service/service-manual-e-series-english/) |
 
 ## Tech stack
 
@@ -133,7 +149,7 @@ streamlit run app/app.py
 
 | Phase | Date | Deliverable | Status |
 |-------|------|-------------|--------|
-| P1 | 20 Oct 2026 | Proposal, tech stack, MVP definition | ✅ |
+| P1 | 20 Oct 2026 | Proposal, tech stack, MVP definition | ✅ (revised after lecturer feedback) |
 | P2 | 03 Nov 2026 | Literature review, PDF extraction, BM25 baseline, test plan | ⏳ |
 | P3 | 24 Nov 2026 | Embeddings + FAISS, first cited answers, plain-LLM baseline | ⏳ |
 | P4 | 08 Dec 2026 | Test set complete, hybrid search, comparison + error analysis | ⏳ |
@@ -158,5 +174,7 @@ FactoryDocs Assistant is a **decision aid** for a university project. It is not 
 2. Y. Gao et al., "Retrieval-Augmented Generation for Large Language Models: A Survey," arXiv:2312.10997, 2023.
 3. S. Es et al., "RAGAS: Automated Evaluation of Retrieval Augmented Generation," *EACL (Demos)*, 2024.
 4. N. Reimers and I. Gurevych, "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks," *EMNLP*, 2019.
-5. J. Johnson, M. Douze and H. Jégou, "Billion-scale similarity search with GPUs," *IEEE Trans. Big Data*, 2019.
+5. J. Johnson, M. Douze and H. Jégou, "Billion-scale similarity search with GPUs," *IEEE Trans. Big Data*, vol. 7, no. 3, pp. 535–547, 2021.
 6. S. Robertson and H. Zaragoza, "The Probabilistic Relevance Framework: BM25 and Beyond," *Found. Trends Inf. Retr.*, 2009.
+7. Siemens AG, "The True Cost of Downtime 2024," Siemens Digital Industries, 2024. [Online]. Available: https://assets.new.siemens.com/siemens/assets/api/uuid:1b43afb5-2d07-47f7-9eb7-893fe7d0bc59/TCOD-2024_original.pdf
+8. Universal Robots, "Understanding Protective Stops," support article, 2026. [Online]. Available: https://www.universal-robots.com/articles/ur/robot-care-maintenance/understanding-protective-stops/
