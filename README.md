@@ -5,7 +5,7 @@
 > Case Study: Intelligent Systems in Production (MDM-2) · Deggendorf Institute of Technology (THD)
 > Track: Software & Simulation · Lecturer: Hamidreza Heidari, PhD
 
-![Status](https://img.shields.io/badge/status-proposal%20phase-orange)
+![Status](https://img.shields.io/badge/status-methodology%20%26%20design%20phase-orange)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 
 ---
@@ -63,7 +63,16 @@ All four approaches are tested on the same question set:
 | 3 | Dense RAG | Meaning-based search with sentence embeddings |
 | 4 | Hybrid RAG | BM25 + dense search combined (handles exact error codes like C157A2 and problem descriptions) |
 
-We also test different chunk sizes and top-k values.
+We also test different chunk sizes (400 / 800 / 1,000 characters) and top-k values (3 / 5 / 10). Hybrid search fuses the BM25 and dense rankings with Reciprocal Rank Fusion (RRF, k = 60).
+
+## Current status: BM25 feasibility check
+
+A first test on the real manuals (`src/feasibility_bm25.py`): PyMuPDF extraction, 800-character chunks with 100 overlap, BM25 keyword search, 5 example questions. This is a feasibility check, not the evaluation.
+
+- 690 pages → 1,550 chunks, extracted in 1.8 s on a team laptop; each BM25 query takes under 10 ms
+- The correct page was in the top 5 for **4 of 5** questions, e.g. "C157A2" → Error Codes Directory p. 35 (rank 1), "How do I set the payload for a new gripper" → UR5e User Manual p. 105 "Set Payload" (rank 1)
+- **Missed:** "The robot keeps dropping parts" did not reach the gripper manual, because keyword search needs the manual's own words. This confirms the need for dense and hybrid retrieval.
+- Table-of-contents pages appear in results (they list every code), so front matter will be filtered before indexing.
 
 ## Evaluation
 
@@ -93,11 +102,12 @@ We use four public manuals for the UR5e robot and its gripper. **The PDFs are no
 
 | Purpose | Tool |
 |---------|------|
-| PDF extraction | pdfplumber (PyMuPDF as backup) |
-| Embeddings | sentence-transformers |
+| PDF extraction | PyMuPDF (compared with pdfplumber) |
+| Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
 | Vector search | FAISS |
 | Keyword search | rank-bm25 |
-| Language model | Ollama (e.g., Llama 3 8B), runs locally |
+| Hybrid fusion | Reciprocal Rank Fusion (k = 60) |
+| Language model | Ollama with Llama 3.1 8B, runs locally |
 | Evaluation | pandas, RAGAS |
 | Demo app | Streamlit |
 
@@ -109,6 +119,7 @@ We use four public manuals for the UR5e robot and its gripper. **The PDFs are no
 │   ├── processed/        # extracted, chunked text
 │   └── test_set.csv      # 60 evaluation questions with answers
 ├── src/
+│   ├── feasibility_bm25.py  # first BM25 test on the manuals (done)
 │   ├── extract.py        # PDF text and table extraction
 │   ├── chunk.py          # page-tagged chunking
 │   ├── index.py          # FAISS and BM25 indexes
@@ -123,9 +134,9 @@ We use four public manuals for the UR5e robot and its gripper. **The PDFs are no
 └── README.md
 ```
 
-## Getting started (planned)
+## Getting started
 
-These commands will work once the code is added.
+### Run the feasibility check (works now)
 
 ```bash
 # 1. Clone the repository
@@ -135,13 +146,22 @@ cd FactoryDocs-Assistant-A-Retrieval-Augmented-Chatbot-for-Production-and-Logist
 # 2. Install Python packages
 pip install -r requirements.txt
 
-# 3. Install Ollama (https://ollama.com) and download a model
-ollama pull llama3
+# 3. Download the 4 manuals (links under "Data") into data/raw/, then run
+python src/feasibility_bm25.py data/raw
+```
 
-# 4. Put the manuals in data/raw/, then build the index
+The script expects these file names in the folder: `ErrorCodes.pdf`, `710-965-00_UR5e_User_Manual_en_Global.pdf`, `2F-85_2F-140_UR_PDF_20200211.pdf`, `e-Series_Service_Manual_en.pdf`. It prints the top 5 pages per question and saves `feasibility_results.json`.
+
+### Full system (planned)
+
+These commands will work once the remaining code is added.
+
+```bash
+# Install Ollama (https://ollama.com) and download the model
+ollama pull llama3.1:8b
+
+# Build the indexes, then start the chat app
 python src/index.py
-
-# 5. Start the chat app
 streamlit run app/app.py
 ```
 
@@ -150,10 +170,10 @@ streamlit run app/app.py
 | Phase | Date | Deliverable | Status |
 |-------|------|-------------|--------|
 | P1 | 20 Oct 2026 | Proposal, tech stack, MVP definition | ✅ (revised after lecturer feedback) |
-| P2 | 03 Nov 2026 | Literature review, PDF extraction, BM25 baseline, test plan | ⏳ |
-| P3 | 24 Nov 2026 | Embeddings + FAISS, first cited answers, plain-LLM baseline | ⏳ |
-| P4 | 08 Dec 2026 | Test set complete, hybrid search, comparison + error analysis | ⏳ |
-| P5 | 22 Dec 2026 | Streamlit demo, demo video, run instructions | ⏳ |
+| P2 | 03 Nov 2026 | Bibliography report, input documents selected, test plan | ✅ |
+| P3 | 24 Nov 2026 | Theoretical framework, methodology, system design; BM25 feasibility check | 🔄 |
+| P4 | 08 Dec 2026 | Dense + hybrid retrieval, LLM answers with citations, full test set, first comparison | ⏳ |
+| P5 | 22 Dec 2026 | Experiments, error analysis, Streamlit demo, demo video, run instructions | ⏳ |
 | Final | 12 Jan 2027 | IEEE report and final presentation | ⏳ |
 
 ## Team
