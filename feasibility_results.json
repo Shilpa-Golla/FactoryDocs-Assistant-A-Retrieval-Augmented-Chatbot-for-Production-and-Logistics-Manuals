@@ -1,0 +1,132 @@
+[
+ {
+  "query": "C157A2",
+  "ms": 2.5,
+  "top5": [
+   [
+    "UR Error Codes Directory",
+    35
+   ],
+   [
+    "UR Error Codes Directory",
+    1
+   ],
+   [
+    "UR Error Codes Directory",
+    2
+   ],
+   [
+    "UR Error Codes Directory",
+    3
+   ],
+   [
+    "UR Error Codes Directory",
+    4
+   ]
+  ]
+ },
+ {
+  "query": "What does C153 position deviates from path mean",
+  "ms": 3.1,
+  "top5": [
+   [
+    "UR Error Codes Directory",
+    6
+   ],
+   [
+    "UR Error Codes Directory",
+    34
+   ],
+   [
+    "UR Error Codes Directory",
+    6
+   ],
+   [
+    "UR Error Codes Directory",
+    7
+   ],
+   [
+    "UR Error Codes Directory",
+    37
+   ]
+  ]
+ },
+ {
+  "query": "The robot keeps dropping parts",
+  "ms": 3.0,
+  "top5": [
+   [
+    "UR5e User Manual",
+    97
+   ],
+   [
+    "UR e-Series Service Handbook",
+    122
+   ],
+   [
+    "UR e-Series Service Handbook",
+    26
+   ],
+   [
+    "UR e-Series Service Handbook",
+    123
+   ],
+   [
+    "UR5e User Manual",
+    208
+   ]
+  ]
+ },
+ {
+  "query": "How do I set the payload for a new gripper",
+  "ms": 4.2,
+  "top5": [
+   [
+    "UR5e User Manual",
+    105
+   ],
+   [
+    "UR5e User Manual",
+    107
+   ],
+   [
+    "UR5e User Manual",
+    105
+   ],
+   [
+    "UR5e User Manual",
+    145
+   ],
+   [
+    "UR5e User Manual",
+    106
+   ]
+  ]
+ },
+ {
+  "query": "gripper lost the object",
+  "ms": 5.6,
+  "top5": [
+   [
+    "Robotiq 2F-85/2F-140 Manual",
+    63
+   ],
+   [
+    "Robotiq 2F-85/2F-140 Manual",
+    64
+   ],
+   [
+    "Robotiq 2F-85/2F-140 Manual",
+    64
+   ],
+   [
+    "Robotiq 2F-85/2F-140 Manual",
+    47
+   ],
+   [
+    "Robotiq 2F-85/2F-140 Manual",
+    14
+   ]
+  ]
+ }
+]
